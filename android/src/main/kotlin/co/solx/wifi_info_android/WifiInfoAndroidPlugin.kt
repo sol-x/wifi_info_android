@@ -10,25 +10,25 @@ import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
-import io.flutter.embedding.engine.plugins.activity.ActivityAware
-import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
 
 
 /** WifiInfoAndroidPlugin */
-class WifiInfoAndroidPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
+class WifiInfoAndroidPlugin: FlutterPlugin, MethodCallHandler {
   /// The MethodChannel that will the communication between Flutter and native Android
   ///
   /// This local reference serves to register the plugin with the Flutter Engine and unregister it
   /// when the Flutter Engine is detached from the Activity
   private lateinit var channel: MethodChannel
-  private var activity: Activity? = null
+  private var applicationContext: Context? = null
 
   override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
+    applicationContext = flutterPluginBinding.applicationContext
     channel = MethodChannel(flutterPluginBinding.binaryMessenger, "wifi_info_android")
     channel.setMethodCallHandler(this)
   }
 
   override fun onDetachedFromEngine(@NonNull binding: FlutterPlugin.FlutterPluginBinding) {
+    applicationContext = null
     channel.setMethodCallHandler(null)
   }
 
@@ -42,12 +42,7 @@ class WifiInfoAndroidPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
 
   private fun getWifiInfo(result: MethodChannel.Result) {
     try {
-      if (activity == null) {
-        result.success(null);
-        return;
-      }
-
-      val wifiManager = activity?.getSystemService(Context.WIFI_SERVICE) as WifiManager
+      val wifiManager = applicationContext?.getSystemService(Context.WIFI_SERVICE) as WifiManager
       if (wifiManager == null) {
         result.success(null);
         return;
@@ -63,21 +58,5 @@ class WifiInfoAndroidPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
     } catch(e: Exception) {
       result.error("nowifi", "Got exception when trying to read Wi-Fi state", null)
     }
-  }
-
-  override fun onAttachedToActivity(@NonNull binding: ActivityPluginBinding) {
-    activity = binding.activity;
-  }
-
-  override fun onDetachedFromActivity() {
-    activity = null
-  }
-
-  override fun onReattachedToActivityForConfigChanges(@NonNull binding: ActivityPluginBinding) {
-    activity = binding.activity
-  }
-
-  override fun onDetachedFromActivityForConfigChanges() {
-    activity = null
   }
 }

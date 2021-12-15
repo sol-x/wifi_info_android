@@ -1,6 +1,6 @@
 name: wifi_info_android
 description: A plugin to get the wifi SSID, BSSID and RSSI on android
-version: 1.0.0
+version: 1.0.1
 homepage: http://github.com/sol-x/wifi_info_android
 repository: http://github.com/sol-x/wifi_info_android
 
